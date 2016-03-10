@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="storeInfo">
+        <item>台大1號店</item>
+        <item>台大2號店</item>
+        <item>台大3號店</item>
+        <item>台大4號店</item>
+        <item>台大5號店</item>
+    </string-array>
+</resources>

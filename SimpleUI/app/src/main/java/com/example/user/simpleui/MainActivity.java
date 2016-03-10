@@ -12,6 +12,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences.Editor editor;  //類似一隻筆
 
     ListView listView;
+    Spinner spinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
         hideCheckBox = (CheckBox)findViewById(R.id.checkBox);
 
         listView = (ListView)findViewById(R.id.listView);
+        spinner = (Spinner)findViewById(R.id.spinner);
 
         sp = getSharedPreferences("setting", Context.MODE_PRIVATE);  //指定紙叫setting
         editor = sp.edit();
@@ -78,6 +81,24 @@ public class MainActivity extends AppCompatActivity {
         });
 
         setListView();
+        setSpinner();
+    }
+
+    private void setListView()
+    {
+        //String[] data = {"1","2","3","4","5"};
+        String[] data = Utils.readFile(this, "history.txt").split("\n");
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, data);
+        listView.setAdapter(adapter);
+    }
+
+    private void setSpinner()
+    {
+        //String[] data = {"1","2","3","4","5"};
+        String[] data = getResources().getStringArray(R.array.storeInfo);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, data);
+        spinner.setAdapter(adapter);
     }
 
     public void submit(View view)
@@ -98,14 +119,5 @@ public class MainActivity extends AppCompatActivity {
         editText.setText("");
 
         setListView();
-    }
-
-    private void setListView()
-    {
-        //String[] data = {"1","2","3","4","5"};
-        String[] data = Utils.readFile(this, "history.txt").split("\n");
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, data);
-        listView.setAdapter(adapter);
     }
 }
