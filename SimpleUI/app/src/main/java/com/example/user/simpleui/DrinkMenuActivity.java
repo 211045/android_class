@@ -1,5 +1,6 @@
 package com.example.user.simpleui;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -20,6 +21,14 @@ public class DrinkMenuActivity extends AppCompatActivity {
         int number = Integer.parseInt(button.getText().toString());  //取得button上的字串，並轉為數字
         number++;
         button.setText(String.valueOf(number));  //數字轉成String
+    }
+
+    public void done(View view)
+    {
+        Intent data = new Intent();
+        data.putExtra("result","order done");
+        setResult(RESULT_OK, data);
+        finish();
     }
 
     public void cancel(View view)

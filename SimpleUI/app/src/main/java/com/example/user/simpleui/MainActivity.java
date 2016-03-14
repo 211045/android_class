@@ -18,6 +18,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final int REQUEST_CODE_MENU_ACTIVITY = 0; //定義固定(final)常數，變數全大寫
+
     TextView textView;
     EditText editText;
     CheckBox hideCheckBox;
@@ -132,6 +135,20 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent();
         intent.setClass(this, DrinkMenuActivity.class);  //使用intent從MainActivity(this)呼叫DrinkMenuActivity
 
-        startActivity(intent);
+        //startActivity(intent);
+        startActivityForResult(intent, REQUEST_CODE_MENU_ACTIVITY);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE_MENU_ACTIVITY)
+        {
+            if (resultCode == RESULT_OK)
+            {
+                textView.setText(data.getStringExtra("result"));
+            }
+        }
     }
 }
