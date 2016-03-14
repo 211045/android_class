@@ -25,14 +25,15 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences sp;  //類似一張白紙
     SharedPreferences.Editor editor;  //類似一隻筆
 
-    ListView listView;
-    Spinner spinner;
+    ListView listView;  //清單
+    Spinner spinner;  //下拉式選單
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //抓欄位的值，要強制轉型
         textView = (TextView)findViewById(R.id.textView);
         editText = (EditText)findViewById(R.id.editText);
         hideCheckBox = (CheckBox)findViewById(R.id.checkBox);
@@ -52,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
                 editor.putString("editText", editText.getText().toString());  //儲存editText的文字到sp
                 editor.apply();
 
+                //偵測按下鍵盤上的ENTER ??，然後submit
                 if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
                     submit(v);
                     return true;
@@ -60,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //虛擬鍵盤??
         editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -98,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
     {
         //String[] data = {"1","2","3","4","5"};
         String[] data = getResources().getStringArray(R.array.storeInfo);
+
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, data);
         spinner.setAdapter(adapter);
     }
@@ -126,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
     {
         //不同的Layout用Intent來溝通
         Intent intent = new Intent();
-        intent.setClass(this, DrinkMenuActivity.class);
+        intent.setClass(this, DrinkMenuActivity.class);  //使用intent從MainActivity(this)呼叫DrinkMenuActivity
 
         startActivity(intent);
     }
