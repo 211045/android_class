@@ -108,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
 
         ParseObject testObject = new ParseObject("HomeworkParse");
         testObject.put("sid", "And26306");  //HomeworkParse
+        testObject.put("email", "u211045@taipower.com.tw");  //HomeworkParse
         //testObject.saveInBackground();
         testObject.saveInBackground(new SaveCallback() {
             @Override
