@@ -50,7 +50,7 @@ public class DrinkMenuActivity extends AppCompatActivity {
 
         for (int i = 0; i < count -1; i++)
         {
-            LinearLayout ll = (LinearLayout)rootLinearLayout.getChildAt(i);
+            LinearLayout ll = (LinearLayout)rootLinearLayout.getChildAt(i);  //取得LinearLayout(horizontal)
             TextView drinkNameTextView = (TextView)ll.getChildAt(0);
             Button lButton = (Button)ll.getChildAt(1);
             Button mButton = (Button)ll.getChildAt(2);
@@ -62,7 +62,7 @@ public class DrinkMenuActivity extends AppCompatActivity {
             try {
                 JSONObject object = new JSONObject();
 
-                object.put("name", drinkName);
+                object.put("name", drinkName);  //JSON Object的key:value
                 object.put("lNumber", lNumber);
                 object.put("mNumber", mNumber);
 

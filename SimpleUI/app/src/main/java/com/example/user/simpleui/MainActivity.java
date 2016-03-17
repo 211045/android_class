@@ -18,6 +18,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.parse.Parse;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.SaveCallback;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_MENU_ACTIVITY = 0; //定義固定(final)常數，變數全大寫
@@ -31,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
 
     ListView listView;  //清單
     Spinner spinner;  //下拉式選單
+
+    String menuResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +101,27 @@ public class MainActivity extends AppCompatActivity {
 
         setListView();
         setSpinner();
+
+        Parse.enableLocalDatastore(this);
+
+        Parse.initialize(this);
+
+        ParseObject testObject = new ParseObject("HomeworkParse");
+        testObject.put("sid", "And26306");  //HomeworkParse
+        //testObject.saveInBackground();
+        testObject.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e == null)
+                {
+                    Toast.makeText(MainActivity.this, "Submit OK", Toast.LENGTH_LONG).show();
+                }
+                else
+                {
+                    Toast.makeText(MainActivity.this, "Submit Fail", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
     }
 
     private void setListView()
@@ -114,6 +146,25 @@ public class MainActivity extends AppCompatActivity {
     {
         //Toast.makeText(this, "Hello world", Toast.LENGTH_LONG).show();
         String text = editText.getText().toString();
+
+        ParseObject orderObject = new ParseObject("Order");
+        orderObject.put("note", text);
+        orderObject.put("storeInfo", spinner.getSelectedItem());
+        orderObject.put("menu", menuResult);
+
+        orderObject.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e == null)
+                {
+                    Toast.makeText(MainActivity.this, "Submit OK", Toast.LENGTH_LONG).show();
+                }
+                else
+                {
+                    Toast.makeText(MainActivity.this, "Submit Fail", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
 
         Utils.writeFile(this, "history.txt", text + '\n');
 
@@ -148,7 +199,28 @@ public class MainActivity extends AppCompatActivity {
         {
             if (resultCode == RESULT_OK)
             {
-                textView.setText(data.getStringExtra("result"));
+                //textView.setText(data.getStringExtra("result"));
+                menuResult = data.getStringExtra("result");
+
+                try {
+                    JSONArray array = new JSONArray(menuResult);
+
+                    String text = "";
+
+                    for (int i = 0; i < array.length(); i++)
+                    {
+                        JSONObject order = array.getJSONObject(i);
+
+                        String name = order.getString("name");
+                        String lNumber = String.valueOf(order.getInt("lNumber"));
+                        String mNumber = String.valueOf(order.getString("mNumber"));
+
+                        text = text + name + "l:" + lNumber + "m:" + mNumber + "\n";
+                    }
+                    textView.setText(text);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
