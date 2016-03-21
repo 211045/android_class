@@ -3,16 +3,20 @@ package com.example.user.simpleui;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
@@ -38,6 +42,7 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_MENU_ACTIVITY = 0; //定義固定(final)常數，變數全大寫
+    private static final int REQUEST_CODE_CAMERA = 1;
 
     TextView textView;
     EditText editText;
@@ -48,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
 
     ListView listView;  //清單
     Spinner spinner;  //下拉式選單
+
+    ImageView photoView;
 
     String menuResult;
 
@@ -65,6 +72,8 @@ public class MainActivity extends AppCompatActivity {
 
         listView = (ListView)findViewById(R.id.listView);
         spinner = (Spinner)findViewById(R.id.spinner);
+
+        photoView = (ImageView)findViewById(R.id.imageView);
 
         sp = getSharedPreferences("setting", Context.MODE_PRIVATE);  //指定紙叫setting
         editor = sp.edit();
@@ -301,6 +310,13 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+        else if (requestCode == REQUEST_CODE_CAMERA)
+        {
+            if (resultCode == RESULT_OK)
+            {
+                photoView.setImageURI(Utils.getPhotoUri());
+            }
+        }
     }
 
     @Override
@@ -313,5 +329,33 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         Log.d("Debug", "Main Menu onPause");
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_take_photo)
+        {
+            Toast.makeText(this, "take photo", Toast.LENGTH_LONG).show();
+            goToCamera();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void goToCamera()
+    {
+        Intent intent = new Intent();
+        intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, Utils.getPhotoUri());
+
+        //startActivity(intent);
+        startActivityForResult(intent, REQUEST_CODE_CAMERA);
     }
 }
