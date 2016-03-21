@@ -14,18 +14,26 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.SaveCallback;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
     Spinner spinner;  //下拉式選單
 
     String menuResult;
+
+    List<ParseObject> queryResults;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
         setListView();
         setSpinner();
 
-        Parse.enableLocalDatastore(this);
+/*        Parse.enableLocalDatastore(this);
 
         Parse.initialize(this);
 
@@ -115,32 +125,99 @@ public class MainActivity extends AppCompatActivity {
             public void done(ParseException e) {
                 if (e == null)
                 {
-                    Toast.makeText(MainActivity.this, "Submit OK", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "onCreate OK", Toast.LENGTH_LONG).show();
                 }
                 else
                 {
-                    Toast.makeText(MainActivity.this, "Submit Fail", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "onCreate Fail", Toast.LENGTH_LONG).show();
                 }
             }
         });
-    }
+*/    }
 
     private void setListView()
     {
         //String[] data = {"1","2","3","4","5"};
+        /*
         String[] data = Utils.readFile(this, "history.txt").split("\n");
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, data);
         listView.setAdapter(adapter);
+        */
+
+        ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("Order");
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                if (e != null)
+                {
+                    Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                    // Log.d("Debug", "setListView");
+                    return;
+                }
+                // Log.d("Debug", "setListView");
+
+                queryResults = list;
+
+                List<Map<String, String>> data = new ArrayList<Map<String, String>>();
+
+                for (int i = 0; i < queryResults.size(); i++)
+                {
+                    ParseObject object = queryResults.get(i);
+                    String note = object.getString("note");
+                    String storeInfo = object.getString("storeInfo");
+                    String menu = object.getString("menu");
+
+                    Map<String, String> item = new HashMap<String, String>();
+
+                    item.put("note", note);
+                    item.put("storeInfo", storeInfo);
+                    item.put("drinkNum", "15");
+
+                    data.add(item);
+                }
+
+                String[] from = {"note", "storeInfo", "drinkNum"};
+                int[] to = {R.id.note, R.id.storeInfo, R.id.drinkNum};
+
+                SimpleAdapter adapter = new SimpleAdapter(MainActivity.this, data, R.layout.listview_item, from, to);
+
+                listView.setAdapter(adapter);
+            }
+        });
     }
 
     private void setSpinner()
     {
         //String[] data = {"1","2","3","4","5"};
+        /*
         String[] data = getResources().getStringArray(R.array.storeInfo);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, data);
         spinner.setAdapter(adapter);
+        */
+        ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("StoreInfo");
+
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                if (e != null) {
+                    Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                String[] stores = new String[list.size()];
+                for (int i = 0; i < list.size(); i++)
+                {
+                    ParseObject object = list.get(i);
+                    stores[i] = object.getString("name") + "," + object.getString("address");
+
+                    ArrayAdapter<String> storeAdapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, stores);
+                    spinner.setAdapter(storeAdapter);
+                }
+            }
+        });
+
     }
 
     public void submit(View view)
@@ -148,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
         //Toast.makeText(this, "Hello world", Toast.LENGTH_LONG).show();
         String text = editText.getText().toString();
 
-        ParseObject orderObject = new ParseObject("Order");
+/*        ParseObject orderObject = new ParseObject("Order");
         orderObject.put("note", text);
         orderObject.put("storeInfo", spinner.getSelectedItem());
         orderObject.put("menu", menuResult);
@@ -166,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
+*/
         Utils.writeFile(this, "history.txt", text + '\n');
 
         if (hideCheckBox.isChecked())
