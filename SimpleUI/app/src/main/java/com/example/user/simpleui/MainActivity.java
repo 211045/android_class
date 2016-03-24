@@ -1,8 +1,12 @@
 package com.example.user.simpleui;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -26,6 +30,7 @@ import android.widget.Toast;
 import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
@@ -43,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_MENU_ACTIVITY = 0; //定義固定(final)常數，變數全大寫
     private static final int REQUEST_CODE_CAMERA = 1;
+
+    private boolean hasPhoto = false;
 
     TextView textView;
     EditText editText;
@@ -68,12 +75,11 @@ public class MainActivity extends AppCompatActivity {
         //抓欄位的值，要強制轉型
         textView = (TextView)findViewById(R.id.textView);
         editText = (EditText)findViewById(R.id.editText);
+        photoView = (ImageView)findViewById(R.id.imageView);
         hideCheckBox = (CheckBox)findViewById(R.id.checkBox);
 
         listView = (ListView)findViewById(R.id.listView);
         spinner = (Spinner)findViewById(R.id.spinner);
-
-        photoView = (ImageView)findViewById(R.id.imageView);
 
         sp = getSharedPreferences("setting", Context.MODE_PRIVATE);  //指定紙叫setting
         editor = sp.edit();
@@ -115,6 +121,11 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 editor.putBoolean("hideCheckBox", hideCheckBox.isChecked());  //儲存hideCheckBox的勾選狀態到sp
                 editor.apply();
+
+                if (isChecked)
+                    photoView.setVisibility(View.GONE);  //隱藏photo
+                else
+                    photoView.setVisibility(View.VISIBLE);  //顯示photo
             }
         });
 
@@ -300,8 +311,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 String[] stores = new String[list.size()];
-                for (int i = 0; i < list.size(); i++)
-                {
+                for (int i = 0; i < list.size(); i++) {
                     ParseObject object = list.get(i);
                     stores[i] = object.getString("name") + "," + object.getString("address");
 
@@ -317,11 +327,18 @@ public class MainActivity extends AppCompatActivity {
         //Toast.makeText(this, "Hello world", Toast.LENGTH_LONG).show();
         String text = editText.getText().toString();
 
-/*
         ParseObject orderObject = new ParseObject("Order");
         orderObject.put("note", text);
         orderObject.put("storeInfo", spinner.getSelectedItem());
         orderObject.put("menu", menuResult);
+
+        if (hasPhoto)
+        {
+            Uri uri = Utils.getPhotoUri();
+            ParseFile file = new ParseFile("photo.png", Utils.uriToBytes(this, uri));
+
+            orderObject.put("photo", file);
+        }
 
         orderObject.saveInBackground(new SaveCallback() {
             @Override
@@ -329,6 +346,12 @@ public class MainActivity extends AppCompatActivity {
                 if (e == null)
                 {
                     Toast.makeText(MainActivity.this, "Submit OK", Toast.LENGTH_LONG).show();
+                    //還原初始值
+                    photoView.setImageResource(0);
+                    editText.setText("");
+                    textView.setText("");
+                    hasPhoto = false;
+                    setListView();
                 }
                 else
                 {
@@ -336,20 +359,21 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-*/
+
         Utils.writeFile(this, "history.txt", text + '\n');
 
-        if (hideCheckBox.isChecked())
+/*        if (hideCheckBox.isChecked())
         {
             Toast.makeText(this, text, Toast.LENGTH_LONG).show();
             textView.setText("********");
             editText.setText("********");
             return;
         }
-        textView.setText(text);
-        editText.setText("");
+*/
+        //textView.setText(text);
+        //editText.setText("");
 
-        setListView();
+        //setListView();
     }
 
     public void goToMenu(View view)
@@ -399,6 +423,7 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK)
             {
                 photoView.setImageURI(Utils.getPhotoUri());
+                hasPhoto = true;
             }
         }
     }
@@ -435,6 +460,17 @@ public class MainActivity extends AppCompatActivity {
 
     private void goToCamera()
     {
+        if (Build.VERSION.SDK_INT >= 23)
+        {
+            //if (checkSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE") != PackageManager.PERMISSION_GRANTED)
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+            {
+                //requestPermissions(new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}, 0);
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+                return;
+            }
+        }
+
         Intent intent = new Intent();
         intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, Utils.getPhotoUri());
