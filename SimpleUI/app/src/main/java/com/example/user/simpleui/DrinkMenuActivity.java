@@ -41,6 +41,7 @@ public class DrinkMenuActivity extends AppCompatActivity {
         finish();
     }
 
+    //取得訂單(menu)內容並組成JSONObject
     public JSONArray getData()
     {
         LinearLayout rootLinearLayout = (LinearLayout)findViewById(R.id.root);

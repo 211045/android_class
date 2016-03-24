@@ -168,6 +168,11 @@ public class MainActivity extends AppCompatActivity {
 
                 queryResults = list;
 
+                //Homework2
+                String totalJSONObjectToString = "";  // raw data
+                //String recordListParseObjectString = "";  // 解析後的data
+                //
+
                 List<Map<String, String>> data = new ArrayList<Map<String, String>>();
 
                 for (int i = 0; i < queryResults.size(); i++)
@@ -177,11 +182,90 @@ public class MainActivity extends AppCompatActivity {
                     String storeInfo = object.getString("storeInfo");
                     String menu = object.getString("menu");
 
+                    //Homework2
+                    //String oneOrderInfo = "";
+                    String oneOrderSum_String = ""; // 每筆飲料訂單的總杯數 初始值 0
+                    int oneOrderSum_Int = 0;
+                    //totalJSONObjectToString = totalJSONObjectToString + "\n" + menu;
+                    totalJSONObjectToString = menu;
+
+                    try {
+                        JSONArray oneStoreOrderJSONArray = new JSONArray(menu);
+                        for (int j = 0; j < oneStoreOrderJSONArray.length(); j++)
+                        {
+                            JSONObject order = oneStoreOrderJSONArray.getJSONObject(j);
+
+                            // "Key" defined from JSONObject from Parse Server's Data : "name" & "l" & "m"
+                            /*String name = order.getString("name");
+                            String l = String.valueOf(order.getInt("l"));
+                            String m = String.valueOf(order.getInt("m"));
+                            recordListParseObjectString = recordListParseObjectString + name + "\t\t" + "l:" + l + "\t\t" + "m:" + m + "\n"; //記錄所有訂單內容
+                            oneOrderInfo = oneOrderInfo + name + "\t\t" + "l:" + l + "\t\t" + "m:" + m + "\n"; //顯示一張訂單內容
+                            */
+
+                            oneOrderSum_Int += order.getInt("l") + order.getInt("m");
+                            // 判斷 飲料訂單的數量為空值的情況
+                            /*if(order.isNull("l"))
+                                oneOrderSum_Int = oneOrderSum_Int;
+                            else
+                                oneOrderSum_Int = oneOrderSum_Int + order.getInt("l");
+
+                            if(order.isNull("m"))
+                                oneOrderSum_Int = oneOrderSum_Int;
+                            else
+                                oneOrderSum_Int = oneOrderSum_Int + order.getInt("m");*/
+                        }
+                        oneOrderSum_String = String.valueOf(oneOrderSum_Int);
+                    } catch (JSONException e1) {
+                        e1.printStackTrace();
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                    }
+
+                    try {
+                        JSONArray oneStoreOrderJSONArray = new JSONArray(menu);
+                        for (int j = 0; j < oneStoreOrderJSONArray.length(); j++)
+                        {
+                            JSONObject order = oneStoreOrderJSONArray.getJSONObject(j);
+
+                            // "Key" defined from JSONObject from Parse Server's Data : "name" & "lNumber" & "mNumber"
+                            /*String name = order.getString("name");
+                            String lNumber = String.valueOf(order.getInt("lNumber"));
+                            String mNumber = String.valueOf(order.getInt("mNumber"));
+                            recordListParseObjectString = recordListParseObjectString + name + "\t\t" + "lNumber:" + lNumber + "\t\t" + "mNumber:" + mNumber + "\n"; //記錄所有訂單內容
+                            oneOrderInfo = oneOrderInfo + name + "\t\t" + "lNumber:" + lNumber + "\t\t" + "mNumber:" + mNumber + "\n"; //顯示一張訂單內容
+                            */
+
+                            oneOrderSum_Int += order.getInt("lNumber") + order.getInt("mNumber");
+                            // 判斷 飲料訂單的數量為空值的情況
+                            /*if(order.isNull("lNumber"))
+                                oneOrderSum_Int = oneOrderSum_Int;
+                            else
+                                oneOrderSum_Int = oneOrderSum_Int + order.getInt("lNumber");
+
+                            if(order.isNull("mNumber"))
+                                oneOrderSum_Int = oneOrderSum_Int;
+                            else
+                                oneOrderSum_Int = oneOrderSum_Int + order.getInt("mNumber");*/
+                        }
+                        oneOrderSum_String = String.valueOf(oneOrderSum_Int);
+                    } catch (JSONException e1) {
+                        e1.printStackTrace();
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                    }
+                    //
+
                     Map<String, String> item = new HashMap<String, String>();
 
                     item.put("note", note);
                     item.put("storeInfo", storeInfo);
-                    item.put("drinkNum", "15");
+                    //item.put("drinkNum", "15");
+
+                    // Homework2
+                    //item.put("drinkNum", totalJSONObjectToString);
+                    item.put("drinkNum", oneOrderSum_String);
+                    //
 
                     data.add(item);
                 }
@@ -226,7 +310,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
     }
 
     public void submit(View view)
@@ -234,7 +317,8 @@ public class MainActivity extends AppCompatActivity {
         //Toast.makeText(this, "Hello world", Toast.LENGTH_LONG).show();
         String text = editText.getText().toString();
 
-/*        ParseObject orderObject = new ParseObject("Order");
+/*
+        ParseObject orderObject = new ParseObject("Order");
         orderObject.put("note", text);
         orderObject.put("storeInfo", spinner.getSelectedItem());
         orderObject.put("menu", menuResult);
@@ -302,7 +386,7 @@ public class MainActivity extends AppCompatActivity {
                         String lNumber = String.valueOf(order.getInt("lNumber"));
                         String mNumber = String.valueOf(order.getString("mNumber"));
 
-                        text = text + name + "l:" + lNumber + "m:" + mNumber + "\n";
+                        text = text + name + "lNumber:" + lNumber + "mNumber:" + mNumber + "\n";
                     }
                     textView.setText(text);
                 } catch (JSONException e) {
