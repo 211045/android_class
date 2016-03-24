@@ -1,6 +1,7 @@
 package com.example.user.simpleui;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,12 +17,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -66,6 +69,9 @@ public class MainActivity extends AppCompatActivity {
     String menuResult;
 
     List<ParseObject> queryResults;
+
+    ProgressDialog progressDialog;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,8 +135,24 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //XXX
+
+
+        listView.setVisibility(View.GONE);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                goToDetailOrder(position);
+            }
+        });
+
+
+
         setListView();
         setSpinner();
+
+        progressDialog = new ProgressDialog(this);
+        progressBar = (ProgressBar)findViewById(R.id.progressBar);
 
 /*        Parse.enableLocalDatastore(this);
 
@@ -173,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
                 {
                     Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
                     // Log.d("Debug", "setListView");
+                    progressBar.setVisibility(View.GONE);
                     return;
                 }
                 // Log.d("Debug", "setListView");
@@ -287,6 +310,8 @@ public class MainActivity extends AppCompatActivity {
                 SimpleAdapter adapter = new SimpleAdapter(MainActivity.this, data, R.layout.listview_item, from, to);
 
                 listView.setAdapter(adapter);
+                listView.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
             }
         });
     }
@@ -340,9 +365,24 @@ public class MainActivity extends AppCompatActivity {
             orderObject.put("photo", file);
         }
 
+        progressDialog.setTitle("Loading...");
+        progressDialog.show();
+
+        //XXX
+        /*
+        listView.setVisibility(View.GONE);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                goToDetailOrder(position);
+            }
+        });
+        */
+
         orderObject.saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
+                progressDialog.dismiss();  //progressDialog消失
                 if (e == null)
                 {
                     Toast.makeText(MainActivity.this, "Submit OK", Toast.LENGTH_LONG).show();
@@ -462,9 +502,11 @@ public class MainActivity extends AppCompatActivity {
     {
         if (Build.VERSION.SDK_INT >= 23)
         {
+            //API23以上要先確認可存取手機空間
             //if (checkSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE") != PackageManager.PERMISSION_GRANTED)
             if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
             {
+                //詢問是否允許存取資料(ALLOW或DENY)
                 //requestPermissions(new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}, 0);
                 requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
                 return;
@@ -477,5 +519,24 @@ public class MainActivity extends AppCompatActivity {
 
         //startActivity(intent);
         startActivityForResult(intent, REQUEST_CODE_CAMERA);
+    }
+
+    public void goToDetailOrder(int position)
+    {
+        ParseObject object = queryResults.get(position);
+
+        Intent intent = new Intent();
+        intent.setClass(this, OrderDetailActivity.class);
+
+        intent.putExtra("note", object.getString("note"));
+        intent.putExtra("storeInfo", object.getString("storeInfo"));
+        intent.putExtra("menu", object.getString("menu"));
+
+        if (object.getParseFile("photo") != null)
+        {
+            intent.putExtra("photoURL", object.getParseFile("photo").getUrl());
+        }
+
+        startActivity(intent);
     }
 }

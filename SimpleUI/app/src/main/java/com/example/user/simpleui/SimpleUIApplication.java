@@ -12,6 +12,7 @@ public class SimpleUIApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
+        //另開class設定parse連線
         Parse.enableLocalDatastore(this);
 
         Parse.initialize(this);
