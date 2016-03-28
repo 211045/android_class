@@ -136,8 +136,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //XXX
-
-
         listView.setVisibility(View.GONE);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -145,8 +143,7 @@ public class MainActivity extends AppCompatActivity {
                 goToDetailOrder(position);
             }
         });
-
-
+        //XXX
 
         setListView();
         setSpinner();
