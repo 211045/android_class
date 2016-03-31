@@ -12,7 +12,16 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -31,6 +40,8 @@ public class OrderDetailActivity extends AppCompatActivity {
     ImageView staticMapImageView;
     WebView webView;
     Switch imageWebViewSwitch;  ////Homework3
+    MapFragment mapFragment;
+    GoogleMap map;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +54,14 @@ public class OrderDetailActivity extends AppCompatActivity {
         photo = (ImageView)findViewById(R.id.photoView);
         staticMapImageView = (ImageView)findViewById(R.id.staticMapImageView);
         webView = (WebView)findViewById(R.id.webView);
+        mapFragment = (MapFragment)getFragmentManager().findFragmentById(R.id.mapFragment);
+
+        mapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                map = googleMap;
+            }
+        });
 
         ////Homework3
         imageWebViewSwitch = (Switch)findViewById(R.id.imageWebViewSwitch);
@@ -170,8 +189,8 @@ public class OrderDetailActivity extends AppCompatActivity {
         @Override
         protected byte[] doInBackground(String... params){
             String address = params[0];
-            double[] locations = Utils.addressToLatLng(address);
-            url = Utils.getStaticMapUrl(locations, 17);
+            latlng = Utils.addressToLatLng(address);
+            url = Utils.getStaticMapUrl(latlng, 17);
             return Utils.urlToBytes(url);
         }
 
@@ -183,6 +202,23 @@ public class OrderDetailActivity extends AppCompatActivity {
             //載入 ImageView地圖
             Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
             staticMapImageView.setImageBitmap(bmp);
+
+            LatLng location = new LatLng(latlng[0], latlng[1]);
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 17));
+
+            String[] storeInfos = getIntent().getStringExtra("storeInfo").split(",");
+            map.addMarker(new MarkerOptions()
+                            .title(storeInfos[0])
+                            .snippet(storeInfos[1])
+                            .position(location)
+            );
+            map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                @Override
+                public boolean onMarkerClick(Marker marker) {
+                    Toast.makeText(OrderDetailActivity.this, marker.getTitle(), Toast.LENGTH_LONG).show();
+                    return false;
+                }
+            });
 
             super.onPostExecute(bytes);
         }

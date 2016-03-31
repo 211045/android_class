@@ -30,6 +30,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.appevents.AppEventsLogger;
 import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
@@ -468,12 +469,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        // Logs 'install' and 'app activate' App Events.
+        AppEventsLogger.activateApp(this);
         Log.d("Debug", "Main Menu onResume");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        // Logs 'app deactivate' App Event.
+        AppEventsLogger.deactivateApp(this);
         Log.d("Debug", "Main Menu onPause");
     }
 
