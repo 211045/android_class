@@ -6,8 +6,11 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.webkit.WebView;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -27,6 +30,7 @@ public class OrderDetailActivity extends AppCompatActivity {
     ImageView photo;
     ImageView staticMapImageView;
     WebView webView;
+    Switch imageWebViewSwitch;  ////Homework3
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,12 +44,22 @@ public class OrderDetailActivity extends AppCompatActivity {
         staticMapImageView = (ImageView)findViewById(R.id.staticMapImageView);
         webView = (WebView)findViewById(R.id.webView);
 
+        ////Homework3
+        imageWebViewSwitch = (Switch)findViewById(R.id.imageWebViewSwitch);
+        imageWebViewSwitch.setChecked(false);  //(Default) set the switch to OFF {State: ON / OFF}
+
+        //(Default) set { "staticMapImageView" : Visible }  , { "webView" : not Visible}
+        staticMapImageView.setVisibility(View.VISIBLE);
+        webView.setVisibility(View.GONE);
+        ////Homework3
+
         note.setText(getIntent().getStringExtra("note"));
         //storeInfo.setText(getIntent().getStringExtra("storeInfo"));
         String storeInformation = getIntent().getStringExtra("storeInfo");
         storeInfo.setText(storeInformation);
         String menuResult = getIntent().getStringExtra("menu");
 
+        // 於menuView(TextView)中，顯示訂單中的詳細品項與數量
         try {
             JSONArray array = new JSONArray(menuResult);
 
@@ -66,8 +80,11 @@ public class OrderDetailActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        // 取得該店家的地址  // storeInformation = 店名,地址
         address = storeInformation.split(",")[1];
 
+        // 將該店家地址 --> 透過Google API得到回傳URL資訊 (從 /geometry/location/ {"lat", "lng"} JSON格式字串中，取出經緯度座標)
+        // -->  1. 使用  webView.loadUrl(url);    2.將url轉成BitMap呈現於ImageView中
         (new GeoCodingTask()).execute(address);
 
         //double[] locations = Utils.addressToLatLng(address);
@@ -99,6 +116,7 @@ public class OrderDetailActivity extends AppCompatActivity {
             Picasso.with(this).load(url).into(photo);
         */
 
+        // 秀Camera拍照上傳的圖片 by Image View  // 會藉由使用 Class ( ImageLoadingTask )
         url = getIntent().getStringExtra("photoURL");
 
         if (url != null)
@@ -106,6 +124,22 @@ public class OrderDetailActivity extends AppCompatActivity {
             (new ImageLoadingTask(photo)).execute(url);
         }
 
+        ////Homework3
+        imageWebViewSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (!isChecked) //isChecked = false, 只呈現ImageView地圖
+                {
+                    staticMapImageView.setVisibility(View.VISIBLE);  // 確保ImageView地圖是Visible狀態
+                    webView.setVisibility(View.GONE);  //將WebView 地圖設為 not visible
+                }
+                else //isChecked = true, 只呈現 WebView地圖
+                {
+                    staticMapImageView.setVisibility(View.GONE);  //將ImageView地圖設為 not visible
+                    webView.setVisibility(View.VISIBLE);  // 確保WebView地圖是Visible狀態
+                }
+            }
+        });////Homework3
 
         //另一種顯示圖片方式
         /*new AsyncTask<String, Void, byte[]>()
@@ -144,9 +178,12 @@ public class OrderDetailActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(byte[] bytes)
         {
+            //載入 WebView地圖
             webView.loadUrl(url);
+            //載入 ImageView地圖
             Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
             staticMapImageView.setImageBitmap(bmp);
+
             super.onPostExecute(bytes);
         }
     }
