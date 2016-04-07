@@ -12,7 +12,7 @@
     <com.facebook.login.widget.LoginButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/view" />
+        android:id="@+id/loginButton" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -20,7 +20,7 @@
         android:text="Hello World!"
         android:id="@+id/textView"
         android:editable="true"
-        android:layout_below="@+id/view" />
+        android:layout_below="@+id/loginButton" />
 
     <Button
         android:layout_width="wrap_content"

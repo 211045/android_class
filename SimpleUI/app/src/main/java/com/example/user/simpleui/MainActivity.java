@@ -30,7 +30,16 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.appevents.AppEventsLogger;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
@@ -73,6 +82,11 @@ public class MainActivity extends AppCompatActivity {
 
     ProgressDialog progressDialog;
     ProgressBar progressBar;
+
+    LoginButton loginButton;
+    CallbackManager callbackManager;
+    AccessToken accessToken;
+    AccessTokenTracker accessTokenTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,7 +150,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //XXX
         listView.setVisibility(View.GONE);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -144,7 +157,6 @@ public class MainActivity extends AppCompatActivity {
                 goToDetailOrder(position);
             }
         });
-        //XXX
 
         setListView();
         setSpinner();
@@ -173,7 +185,62 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-*/    }
+*/
+        setFacebook();
+    }
+
+    private void setFacebook()
+    {
+        callbackManager = CallbackManager.Factory.create();
+        loginButton = (LoginButton)findViewById(R.id.loginButton);
+        loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {  // loginResult為Facebook給的憑證
+                accessToken = loginResult.getAccessToken();
+                GraphRequest request = GraphRequest.newGraphPathRequest(accessToken,
+                        "/v2.5/me",
+                        new GraphRequest.Callback() {
+                            @Override
+                            public void onCompleted(GraphResponse response) {
+                                JSONObject object = response.getJSONObject();
+                                try {
+                                    String name = object.getString("name");
+                                    Toast.makeText(MainActivity.this, "Hello! " + name, Toast.LENGTH_LONG).show();
+                                    textView.setText("Hello! " + name);
+                                } catch (JSONException e){
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+
+                request.executeAsync();
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+
+            }
+        });
+
+        accessTokenTracker = new AccessTokenTracker() {
+            @Override
+            protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
+                if (currentAccessToken == null)
+                {
+                    textView.setText("Hello World~");
+                }
+                else
+                {
+                    textView.setText("AccessToken Change");
+                }
+            }
+        };
+    }
 
     private void setListView()
     {
@@ -366,17 +433,6 @@ public class MainActivity extends AppCompatActivity {
         progressDialog.setTitle("Loading...");
         progressDialog.show();
 
-        //XXX
-        /*
-        listView.setVisibility(View.GONE);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                goToDetailOrder(position);
-            }
-        });
-        */
-
         orderObject.saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
@@ -427,6 +483,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        callbackManager.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_CODE_MENU_ACTIVITY)
         {
