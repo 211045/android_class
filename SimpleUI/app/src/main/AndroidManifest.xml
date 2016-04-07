@@ -13,12 +13,12 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <meta-data
-            android:name="com.parse.APPLICATION_ID"
-            android:value="XcUmvcSIMJefbmJDFcidLC6mNBQEAaGHYiGPSYAS" />
-        <meta-data
-            android:name="com.parse.CLIENT_KEY"
-            android:value="DnZ3ggXI55eF8ypD5bps3eBYQ0qAFCHehre5Wu6a" />
+        <!--<meta-data-->
+            <!--android:name="com.parse.APPLICATION_ID"-->
+            <!--android:value="XcUmvcSIMJefbmJDFcidLC6mNBQEAaGHYiGPSYAS" />-->
+        <!--<meta-data-->
+            <!--android:name="com.parse.CLIENT_KEY"-->
+            <!--android:value="DnZ3ggXI55eF8ypD5bps3eBYQ0qAFCHehre5Wu6a" />-->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDYComKQ8srCDUeyOnZYdN-y8vvGSVICtY"/>
